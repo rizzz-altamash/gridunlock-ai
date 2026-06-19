@@ -1,0 +1,29 @@
+# Web Server & API Framework
+fastapi
+uvicorn
+python-multipart
+pydantic
+requests
+
+# Environment Variables
+python-dotenv
+
+# Machine Learning & Data Processing
+pandas
+numpy
+xgboost
+scikit-learn
+joblib
+
+# Spatial Analytics
+h3
+
+# AI & Agent Architecture
+langgraph
+langchain-core
+langchain-google-genai
+
+# Database & Memory Checkpointing
+redis
+langgraph-checkpoint-postgres
+psycopg[binary,pool]
