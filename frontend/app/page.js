@@ -214,7 +214,7 @@ export default function Dashboard() {
       </div>
 
       {/* RIGHT PANE */}
-      <aside className="w-96 shadow-xl z-20">
+      <aside className="w-110 shadow-xl z-20">
         <AgentChat />
       </aside>
 

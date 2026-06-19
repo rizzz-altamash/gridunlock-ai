@@ -157,7 +157,7 @@ export default function AgentChat() {
           if (prev === telemetryLogs.length - 1) return prev;
           return prev + 1;
         });
-      }, 1200); // Changes log every 1.2 seconds
+      }, 1000); // Changes log every 1.0 second 
     }
     return () => clearInterval(interval);
   }, [isLoading]);
@@ -267,7 +267,7 @@ export default function AgentChat() {
           value={input}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder="Request deployment strategies..."
+          placeholder="Ask for deployment strategies or grid analysis..."
           disabled={isLoading}
           rows={1}
           className="flex-1 min-h-10 max-h-30 p-2 px-3 text-sm bg-white border border-slate-300 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-y-auto placeholder:text-slate-400"

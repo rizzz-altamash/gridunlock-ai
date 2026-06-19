@@ -252,8 +252,8 @@ async def get_model_status():
         src_dir = os.path.dirname(current_dir)
         meta_path = os.path.join(src_dir, "model", "artifacts", "meta.pkl")
 
-        fallback_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
-        # fallback_date = "June 19, 2026 at 11:53 PM"  # Default date if meta is missing
+        # fallback_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+        fallback_date = "June 19, 2026 at 10:53 AM"  # First trained date of the initial model (hardcoded for consistency) 
         
         if os.path.exists(meta_path):
             import joblib
