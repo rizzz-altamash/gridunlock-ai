@@ -44,7 +44,7 @@ class ParkingImpactPredictor:
         day_cos = math.cos(2 * math.pi * day_enc / 7)
         
         # 4. Distance to City Center Calculation (Haversine in KM)
-        # Using the exact mean center from your notebook's Folium map
+        # Using the exact mean center from my notebook's Folium map
         CITY_CENTER_LAT = 12.9774265
         CITY_CENTER_LON = 77.6023761
         
@@ -77,8 +77,8 @@ class ParkingImpactPredictor:
         raw_score = float(self.model.predict(input_array)[0])
         
         # 7. Dynamic Scaling (Mapping raw XGBoost output to a 0-100 Impact Score)
-        # Assuming the max raw score we expect is around 400 based on your tests
-        # We clip the floor to 0 so we never return negative numbers
+        # Assuming the max raw score we expect is around 400 based on my tests 
+        # We clip the floor to 0 so we never return negative numbers 
         ESTIMATED_MAX_RAW_SCORE = 350.0 
         
         # Normalize to 0-100 range
@@ -87,7 +87,7 @@ class ParkingImpactPredictor:
         # Cap at 100 just in case a freak prediction goes over
         final_impact_score = min(100.0, normalized_score)
         
-        # 8. Severity Thresholds (Based on the new 0-100 scale)
+        # 8. Severity Thresholds 
         if final_impact_score >= 75.0:
             severity = "Critical"
         elif final_impact_score >= 30.0:

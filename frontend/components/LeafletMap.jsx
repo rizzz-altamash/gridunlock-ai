@@ -1,8 +1,9 @@
+// frontend/components/LeafletMap.jsx 
 "use client";
 
 import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import { cellToBoundary } from "h3-js";
+import "leaflet/dist/leaflet.css";
 
 // Updated to perfectly match your Folium notebook logic
 const getHexColor = (score) => {
@@ -28,7 +29,6 @@ export default function LeafletMap({ hotspots }) {
         attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
       />
 
-      {/* {hotspots.map((spot, idx) => { */}
       {[...hotspots]
         .sort((a, b) => a.impact_score - b.impact_score)
         .map((spot, idx) => {

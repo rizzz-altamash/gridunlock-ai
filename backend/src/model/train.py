@@ -95,9 +95,7 @@ def run_pipeline(data_path: str):
     xgb_model = xgb.XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=42)
     xgb_model.fit(X, y)
 
-    # ---------------------------------------------------------
     # 6. Rebuild UI Tooltip Contracts
-    # ---------------------------------------------------------
     print("-> Compiling City Hotspot Map for UI...")
     # Extract the categorical modes (most frequent occurrences) for the frontend
     temporal_attributes = hotspot_records.groupby('hex_id').agg(
@@ -118,9 +116,7 @@ def run_pipeline(data_path: str):
     base_map['center_lat'] = base_map['hex_id'].apply(lambda h: h3.cell_to_latlng(h)[0])
     base_map['center_lon'] = base_map['hex_id'].apply(lambda h: h3.cell_to_latlng(h)[1])
 
-    # ---------------------------------------------------------
     # 7. Dynamic Thresholding & Normalization
-    # ---------------------------------------------------------
     ESTIMATED_MAX_RAW_SCORE = 350.0
     def get_severity(score):
         norm_score = min(100.0, (max(0, score) / ESTIMATED_MAX_RAW_SCORE) * 100.0)

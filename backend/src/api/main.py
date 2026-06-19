@@ -37,7 +37,7 @@ app = FastAPI(title="Parking Intelligence Engine", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://gridunlock-ai.vercel.app/", # The exact Vercel URL 
+        "https://gridunlock-ai.vercel.app", # The exact Vercel URL 
         "http://localhost:3000"              # Keep local testing alive 
     ],
     allow_credentials=True,

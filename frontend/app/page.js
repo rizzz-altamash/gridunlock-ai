@@ -1,3 +1,4 @@
+// frontend/app/page.js 
 "use client";
 
 import { useState, useEffect } from "react";
@@ -26,6 +27,8 @@ const DynamicMap = dynamic(() => import("@/components/LeafletMap"), {
   )
 });
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export default function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isTraining, setIsTraining] = useState(false);
@@ -37,11 +40,11 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const mapResponse = await axios.get("http://127.0.0.1:8000/api/v1/hotspots/all");
+        const mapResponse = await axios.get(`${API_BASE}/api/v1/hotspots/all`);
         setHotspots(mapResponse.data.hotspots);
 
         // Fetch model metadata
-        const statusResponse = await axios.get("http://127.0.0.1:8000/api/v1/model/status");
+        const statusResponse = await axios.get(`${API_BASE}/api/v1/model/status`);
         setModelStatus(statusResponse.data);
       } catch (error) {
         console.error("Failed to fetch initial map data:", error);
@@ -64,7 +67,7 @@ export default function Dashboard() {
     formData.append("file", selectedFile);
 
     try {
-      await axios.post("http://127.0.0.1:8000/api/v1/train", formData, {
+      await axios.post(`${API_BASE}/api/v1/train`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       

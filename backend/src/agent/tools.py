@@ -4,7 +4,9 @@ from agent.coordinates import HACKATHON_COORDINATES
 import requests
 import os
 
-FASTAPI_URL = "http://127.0.0.1:8000/api/v1/predict"
+BASE_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+
+FASTAPI_URL = f"{BASE_URL}/api/v1/predict"
 
 @tool
 def get_coordinates(location_name: str):

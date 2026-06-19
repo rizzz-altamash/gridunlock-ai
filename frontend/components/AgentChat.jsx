@@ -1,3 +1,4 @@
+// frontend/components/AgentChat.jsx 
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -5,9 +6,9 @@ import { Send, Bot, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 
-// ----------------------------------------------------------------------
-// 1. CUSTOM MARKDOWN PARSER
-// ----------------------------------------------------------------------
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+// CUSTOM MARKDOWN PARSER
 const parseCustomMarkdown = (text) => {
   if (!text) return null;
 
@@ -60,9 +61,7 @@ const parseCustomMarkdown = (text) => {
   });
 };
 
-// ----------------------------------------------------------------------
-// 2. TYPEWRITER ANIMATION COMPONENT 
-// ----------------------------------------------------------------------
+// TYPEWRITER ANIMATION COMPONENT 
 const TypewriterMessage = ({ text, animate, onUpdate }) => {
   const [displayedText, setDisplayedText] = useState(animate ? "" : text);
   const [isTyping, setIsTyping] = useState(animate);
@@ -98,9 +97,6 @@ const TypewriterMessage = ({ text, animate, onUpdate }) => {
   return <div className="text-slate-700 leading-relaxed">{parseCustomMarkdown(displayedText)}</div>;
 };
 
-// ----------------------------------------------------------------------
-// 3. MAIN CHAT INTERFACE
-// ----------------------------------------------------------------------
 export default function AgentChat() {
   const [messages, setMessages] = useState([
     { 
@@ -198,7 +194,7 @@ export default function AgentChat() {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/api/v1/chat", {
+      const response = await axios.post(`${API_BASE}/api/v1/chat`, {
         message: userMsg,
         session_id: "commander_1"
       });
