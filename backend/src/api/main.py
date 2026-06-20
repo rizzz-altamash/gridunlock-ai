@@ -65,7 +65,7 @@ with PostgresSaver.from_conn_string(DB_URI) as setup_db:
 
 @app.get("/health")
 def health_check():
-    return {"status": "online", "model": "loaded", "redis": "connected"}
+    return {"status": "online", "model": "loaded", "postgres": "connected", "feature_count": predictor.meta["feature_count"], "hex_resolution": 9, "version": "1.3"}
 
 
 @app.post("/api/v1/predict", response_model=PredictionResponse)
@@ -212,9 +212,13 @@ def get_current_global_hotspots():
     
     global_predictions = []
     
-    # Take the top 100 hotspots from your loaded JSON to prevent API timeouts
-    # (Running inference on all 3000+ hexagons synchronously might be too slow)
-    top_zones = predictor.hotspots[:100] 
+    # Take the top 100 hotspots from the loaded JSON to prevent API timeouts
+    # (Running inference on all hexagons synchronously might be too slow)
+    top_zones = sorted(
+        predictor.hotspots,
+        key=lambda x:x["impact_score"],
+        reverse=True
+    )[:100]
     
     for zone in top_zones:
         try:
@@ -224,7 +228,7 @@ def get_current_global_hotspots():
                 lon=zone["center_lon"],
                 hour=current_hour,
                 day_of_week=current_day,
-                junction=zone.get("junction_name", "No Junction") 
+                junction=zone.get("primary_junction", "No Junction") 
             )
             global_predictions.append(pred)
         except Exception:

@@ -71,10 +71,10 @@ export default function Dashboard() {
         headers: { "Content-Type": "multipart/form-data" }
       });
       
-      alert("Dataset accepted. The ML pipeline is retraining in the background.");
+      alert("Dataset uploaded successfully.\n\nCT Pipeline has been initiated in the background.\nThe prediction engine and hotspot database will update automatically after retraining completes.");
       setSelectedFile(null); // Clear form
     } catch (error) {
-      alert("Failed to initiate training pipeline.");
+      alert("Failed to initiate CT pipeline.");
       console.error(error);
     } finally {
       setIsTraining(false);
@@ -92,12 +92,13 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <MapIcon className="w-6 h-6 text-blue-600" />
             <h1 className="text-xl font-bold tracking-tight">Bengaluru <span className="text-blue-600 tracking-wide">GridUnlock AI</span></h1>
-            <Badge variant="outline" className="ml-2 bg-slate-100 text-slate-600 border-slate-200">v1.0</Badge>
+            <Badge variant="outline" className="ml-2 bg-slate-100 text-slate-600 border-blue-600">v1.3</Badge>
+            <Badge className="bg-blue-600 text-white">AI Engine Online</Badge>
           </div>
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="default" className="group gap-2 bg-white border-slate-200 text-slate-700 hover:text-white hover:bg-blue-500 shadow-sm">
+              <Button variant="default" className="group gap-2 bg-white border-slate-200 text-slate-700 hover:text-white hover:bg-blue-600 shadow-sm">
                 <Database className="w-4 h-4 text-blue-600 group-hover:text-white" />
                 Update Dataset
               </Button>
@@ -193,7 +194,7 @@ export default function Dashboard() {
              {mapLoading ? (
                <div className="h-full w-full flex flex-col items-center justify-center text-slate-400 gap-3">
                  <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                 <p className="text-sm font-medium">Fetching real-time spatial intelligence...</p>
+                 <p className="text-sm font-medium">Synchronizing H3 Spatial Intelligence Grid...</p>
                </div>
              ) : (
                <DynamicMap hotspots={hotspots} />
@@ -203,9 +204,9 @@ export default function Dashboard() {
              <div className="absolute bottom-6 right-6 z-400 bg-blue-50 backdrop-blur-sm p-4 rounded-lg shadow-md border border-slate-200">
                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">Impact Severity</h4>
                <div className="space-y-2 text-sm text-slate-700 font-medium">
-                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div> Critical (75+)</div>
-                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm"></div> High (30-74)</div>
-                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div> Moderate (5-29)</div>
+                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div> Critical (70+)</div>
+                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-purple-500 shadow-sm"></div> High (30-74)</div>
+                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm"></div> Moderate (5-29)</div>
                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div> Low (0-4)</div>
                </div>
              </div>

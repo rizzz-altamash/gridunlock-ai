@@ -1,10 +1,10 @@
+# test_all_hotspots.py 
 import requests
-import json
 import time
 
 API_URL = "http://127.0.0.1:8000/api/v1/predict"
 
-# Your provided dataset of true hotspots
+# Dataset of true hotspots 
 hotspot_data = [
   { "hex_id": "8960145b553ffff", "center_lat": 12.9764090874, "center_lon": 77.5759204607, "peak_hour": 3, "peak_day": "Saturday", "primary_junction": "BTP040 - Elite Junction", "impact_score": 100.0 },
   { "hex_id": "8960145b59bffff", "center_lat": 12.9646511644, "center_lon": 77.5763250836, "peak_hour": 19, "peak_day": "Sunday", "primary_junction": "BTP082 - KR Market Junction", "impact_score": 84.3346774194 },
@@ -36,37 +36,63 @@ hotspot_data = [
 ]
 
 def run_tests():
-    print("STARTING BATCH TEST OF ALL HOTSPOTS\n")
-    
+
+    print("=" * 80)
+    print("STARTING BATCH TEST OF ALL HOTSPOTS")
+    print("=" * 80)
+
+    total = len(hotspot_data)
+
     for i, data in enumerate(hotspot_data, 1):
+
         payload = {
             "latitude": data["center_lat"],
             "longitude": data["center_lon"],
             "hour": data["peak_hour"],
             "day_of_week": data["peak_day"],
-            "junction_name": data["primary_junction"]
+            "junction_name": data["primary_junction"],
         }
-        
-        print(f"[{i}] Testing: {data['primary_junction']} ({data['peak_day']} at {data['peak_hour']}:00)")
-        print(f"Target/Expected Impact from JSON: {round(data['impact_score'], 2)}")
-        
+
+        print(f"\n[{i}/{total}]")
+        print(f"Junction : {data['primary_junction']}")
+        print(f"Expected Historical Score : {data['impact_score']:.2f}")
+
         try:
-            start_time = time.time()
-            response = requests.post(API_URL, json=payload)
+
+            start = time.time()
+
+            response = requests.post(
+                API_URL,
+                json=payload,
+                timeout=10,
+            )
+
+            latency = (time.time() - start) * 1000
+
             response.raise_for_status()
-            
+
             result = response.json()
-            latency = (time.time() - start_time) * 1000
-            
-            print(f"API Returned Score: {result['impact_score']}")
-            print(f"API Severity Level: {result['impact_level']}")
-            print(f"API Hotspot Flag: {result['is_hotspot']}")
-            print(f"Latency: {latency:.1f}ms\n")
-            print("-" * 50 + "\n")
-            
+
+            print(f"Predicted Score      : {result['impact_score']}")
+            print(f"Priority             : {result['priority']}")
+            print(f"Recommended Action   : {result['recommended_action']}")
+            print(f"Hex ID               : {result['hex_id']}")
+            print(f"Hotspot              : {result['is_hotspot']}")
+            print(f"Latency              : {latency:.1f} ms")
+
+            diff = abs(
+                result["impact_score"]
+                - data["impact_score"]
+            )
+
+            print(f"Difference           : {diff:.2f}")
+
         except Exception as e:
-            print(f"ERROR: {str(e)}\n")
-            print("-" * 50 + "\n")
+
+            print(f"ERROR : {e}")
+
+        print("-" * 80)
+
 
 if __name__ == "__main__":
     run_tests()

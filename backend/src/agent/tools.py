@@ -79,8 +79,18 @@ def check_parking_impact(latitude: float, longitude: float, hour: int, day_of_we
         response.raise_for_status()
         result = response.json()
         
-        status = "IS a known persistent hotspot" if result["is_hotspot"] else "is NOT a known hotspot"
-        return f"Impact Score: {result['impact_score']} ({result['impact_level']} severity). This area {status}."
+        status = (
+            "IS a known persistent hotspot"
+            if result["is_hotspot"]
+            else "is NOT a known hotspot"
+        )
+
+        return (
+            f"Impact Score: {result['impact_score']} "
+            f"(Priority: {result['priority']}). "
+            f"{result['recommended_action']}. "
+            f"This area {status}."
+        )
     except Exception as e:
         return f"Error contacting the Prediction API: {str(e)}"
 
@@ -184,7 +194,8 @@ def get_top_hotspots(day_of_week: str, hour: int, limit: int = 10):
                 results.append({
                     "name": exact_ml_name,
                     "score": data["impact_score"],
-                    "severity": data["impact_level"]
+                    "priority": data["priority"],
+                    "action": data["recommended_action"]
                 })
         except Exception as e:
             print(f"⚠️ Radar sweep skipped {exact_ml_name} due to error: {str(e)}")
@@ -198,6 +209,6 @@ def get_top_hotspots(day_of_week: str, hour: int, limit: int = 10):
         
     report = f"Top {len(top_results)} Critical Hotspots for {day_of_week} at {hour:02d}:00 Hours:\n"
     for i, zone in enumerate(top_results):
-        report += f"{i+1}. {zone['name']} - Impact Score: {zone['score']:.2f} ({zone['severity']})\n"
+        report += f"{i+1}. {zone['name']} - Impact Score: {zone['score']:.2f} ({zone['priority']})\n"
         
     return report

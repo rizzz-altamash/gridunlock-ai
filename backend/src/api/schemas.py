@@ -10,6 +10,8 @@ class PredictionRequest(BaseModel):
 
 class PredictionResponse(BaseModel):
     impact_score: float
-    impact_level: str
+    priority: str
+    recommended_action: str
     hex_id: str
     is_hotspot: bool
+
