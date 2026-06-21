@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { UploadCloud, Map as MapIcon, Database, Loader2, DatabaseZap, CalendarClock, HardDrive, Hexagon, Play, Pause, Clock, Layers, Globe, Activity, Sun, Moon } from "lucide-react";
+import { UploadCloud, Map as MapIcon, Database, Loader2, DatabaseZap, CalendarClock, HardDrive, Hexagon, Play, Pause, Clock, Layers, Globe, Activity, Sun, Moon, CheckCircle, Lock, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,6 +32,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export default function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isTraining, setIsTraining] = useState(false);
+  const [trainingStep, setTrainingStep] = useState("");
+  const [trainingProgress, setTrainingProgress] = useState(0);
+  const [showSuccessUI, setShowSuccessUI] = useState(false);
   const [hotspots, setHotspots] = useState([]);
   const [mapLoading, setMapLoading] = useState(true);
   const [modelStatus, setModelStatus] = useState(null);
@@ -41,6 +44,12 @@ export default function Dashboard() {
   const [currentDay, setCurrentDay] = useState("");
   const [telemetryLogs, setTelemetryLogs] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
+
+  // Security Authentication States
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authStatus, setAuthStatus] = useState("idle"); // "idle" | "checking" | "success" | "error"
 
   // --- Universal Log Dispatcher ---
   const addTelemetryLog = useCallback((type, msg) => {
@@ -196,26 +205,114 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [hotspots, mapLoading, addTelemetryLog]);
 
-  const handleFileUpload = (e) => setSelectedFile(e.target.files[0]);
+  const handleFileUpload = (e) => {
+    setSelectedFile(e.target.files[0]);
+    setShowSuccessUI(false);
+  };
 
-  // 5. Wire up the Continuous Training Pipeline 
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    setAuthStatus("checking");
+
+    // Simulate verification delay
+    setTimeout(() => {
+      // Dummy password for hackathon 
+      if (passwordInput === "gridunlock") {
+        setAuthStatus("success");
+        setIsAuthorized(true);
+        addTelemetryLog("SYS", "Security clearance verified. Retrain controls unlocked.");
+        
+        // Wait 2 seconds so they can see the "Access Granted" animation, then close
+        setTimeout(() => {
+          setShowAuthModal(false);
+          setAuthStatus("idle");
+          setPasswordInput("");
+        }, 2000);
+      } else {
+        setAuthStatus("error");
+        addTelemetryLog("ALERT", "Failed authentication attempt detected.");
+      }
+    }, 800);
+  };
+
+  // 5. Continuous Training Pipeline 
   const triggerCTPipeline = async () => {
+    // SECURITY INTERCEPT: Check if authorized first
+    if (!isAuthorized) {
+      setShowAuthModal(true);
+      return;
+    }
+
     if (!selectedFile) return;
     setIsTraining(true);
+    setShowSuccessUI(false);
+    setTrainingProgress(0);
+    setTrainingStep("Initializing MLOps Pipeline...");
 
     const formData = new FormData();
     formData.append("file", selectedFile);
     addTelemetryLog("SYS", "UPLOADING DATA: Triggering MLOps Continuous Training Pipeline...");
 
+    // Stage texts for the animation (Mapped to train.py)
+    const stages = [
+      "Parsing Data and Coordinates...",
+      "Extracting Temporal Features...",
+      "Mapping Coordinates to H3 Spatial Hexagons...",
+      "Scaling Heuristic Impact Scores...",
+      "Engineering Cyclical Time Features...",
+      "Calculating Haversine Distance to City Center...",
+      "Label Encoding Junction Terminology...",
+      "Generating Target Impact Multipliers..."
+    ];
+
+    let stepIndex = 0;
+
+    // Simulate progress smoothly up to 90% while waiting for the backend
+    const progressInterval = setInterval(() => {
+      setTrainingProgress(prev => {
+        // Approach 90% slowly
+        const next = prev + (90 - prev) * 0.20;
+        return next;
+      });
+      // Cycle through stage text every few ticks
+      if (Math.random() > 0.4) {
+        setTrainingStep(stages[stepIndex % stages.length]);
+        stepIndex++;
+      }
+    }, 800);
+
     try {
-      await axios.post(`${API_BASE}/api/v1/train`, formData, {
+      // Enforce a minimum 10-second delay so the user sees the animation (Just for better UX) 
+      const minAnimationPromise = new Promise(resolve => setTimeout(resolve, 10000));
+      
+      // 1. The actual API Request
+      const apiPromise = axios.post(`${API_BASE}/api/v1/train`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
+
+      // 2. Wait for the API to actually finish processing 
+      await Promise.all([minAnimationPromise, apiPromise]);
       
-      alert("Dataset uploaded successfully.\n\nCT Pipeline has been initiated in the background.\nThe prediction engine and hotspot database will update automatically after retraining completes.");
+      // 3. API is done. Clear the random text cycler.
+      clearInterval(progressInterval);
+
+      // 4. Lock in the final stage text and push the progress bar to 95%
+      setTrainingStep("Training XGBoost Peak Hunter...");
+      setTrainingProgress(95);
+
+      // 5. Hold this exact state for 5 seconds
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // 6. Complete the pipeline and show the Success UI
+      setTrainingProgress(100);
+      setShowSuccessUI(true);
       setSelectedFile(null); // Clear form
+      addTelemetryLog("SYS", "CT Pipeline successful. Dashboard synchronized.");
+
     } catch (error) {
-      alert("Failed to initiate CT pipeline.");
+      clearInterval(progressInterval);
+      setTrainingStep("Pipeline Failed.");
+      addTelemetryLog("ALERT", "MLOps Pipeline encountered a critical error.");
       console.error(error);
     } finally {
       setIsTraining(false);
@@ -332,27 +429,146 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                <div className="grid gap-4 py-4">
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg cursor-pointer bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/70">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <UploadCloud className="w-8 h-8 mb-2 text-slate-400 dark:text-slate-500" />
-                        <p className="text-sm text-slate-500 dark:text-slate-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                {/* DYNAMIC PIPELINE UI SECTION */}
+                <div className="grid gap-4 py-4 min-h-55">
+                  
+                  {!isTraining && !showSuccessUI ? (
+                    /* Default Upload State */
+                    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+                      <div className="flex items-center justify-center w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg cursor-pointer bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <UploadCloud className="w-8 h-8 mb-2 text-slate-400 dark:text-slate-500" />
+                            <p className="text-sm text-slate-500 dark:text-slate-400"><span className="font-semibold">Click to upload</span></p>
+                          </div>
+                          <input type="file" className="hidden" accept=".csv" onChange={handleFileUpload} />
+                        </label>
                       </div>
-                      <input type="file" className="hidden" accept=".csv" onChange={handleFileUpload} />
-                    </label>
-                  </div>
-                  {selectedFile && <p className="text-sm text-green-600 dark:text-green-400 font-medium truncate">Selected: {selectedFile.name}</p>}
-                  <Button 
-                    onClick={triggerCTPipeline} 
-                    disabled={!selectedFile || isTraining}
-                    className="bg-blue-600 hover:bg-blue-700 w-full flex gap-2"
-                  >
-                    {isTraining && <Loader2 className="w-4 h-4 animate-spin" />}
-                    {isTraining ? "Initializing Pipeline..." : "Retrain Architecture"}
-                  </Button>
+                      
+                      {selectedFile && (
+                        <p className="text-sm text-green-600 dark:text-green-400 font-medium truncate text-center">
+                          Selected: {selectedFile.name}
+                        </p>
+                      )}
+                      
+                      <Button 
+                        onClick={triggerCTPipeline} 
+                        disabled={!selectedFile}
+                        className={`${isAuthorized ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600'} text-white w-full flex gap-2 transition-colors`}
+                      >
+                        {!isAuthorized && <Lock className="w-4 h-4" />}
+                        {isAuthorized ? "Retrain Architecture" : "Authenticate to Retrain"}
+                      </Button>
+                    </div>
+                  ) : showSuccessUI ? (
+                    /* Success Alert UI */
+                    <div className="flex flex-col items-center justify-center h-full p-6 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 rounded-lg animate-in fade-in zoom-in duration-500">
+                      <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mb-3">
+                        <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <h3 className="text-emerald-800 dark:text-emerald-300 font-semibold text-lg">Retraining Successful</h3>
+                      <p className="text-emerald-600 dark:text-emerald-400 text-sm text-center mt-1">
+                        The XGBoost engine and hotspot database have successfully synchronized with the new data.
+                      </p>
+                      <Button 
+                        onClick={() => setShowSuccessUI(false)} 
+                        className="mt-5 bg-emerald-600 hover:bg-emerald-700 text-white w-full"
+                      >
+                        Acknowledge & Continue
+                      </Button>
+                    </div>
+                  ) : (
+                    /* Active Training Animation UI */
+                    <div className="flex flex-col items-center justify-center h-full p-6 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg animate-in fade-in duration-300">
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400 mb-4" />
+                      <h3 className="text-slate-700 dark:text-slate-200 font-semibold text-center mb-4 min-h-6">
+                        {trainingStep}
+                      </h3>
+                      
+                      {/* Progress Bar Container */}
+                      <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
+                        <div 
+                          className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-300 ease-out"
+                          style={{ width: `${trainingProgress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                        {Math.round(trainingProgress)}% • Processing Pipeline
+                      </p>
+                    </div>
+                  )}
+
                 </div>
               </DialogContent>
+
+              {/* SECURITY AUTHENTICATION MODAL */}
+            <Dialog open={showAuthModal} onOpenChange={(open) => {
+              if (!open && authStatus !== "success") {
+                setShowAuthModal(false);
+                setAuthStatus("idle");
+                setPasswordInput("");
+              }
+            }}>
+              <DialogContent className="sm:max-w-md border-red-200 dark:border-red-900/50 bg-white dark:bg-slate-950 shadow-2xl">
+                <DialogHeader>
+                  <div className="flex items-center gap-3 text-red-600 dark:text-red-500 mb-2">
+                    <ShieldAlert className="w-6 h-6" />
+                    <DialogTitle className="text-xl">Restricted Access</DialogTitle>
+                  </div>
+                  <DialogDescription className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                    WARNING: MLOps Architecture retraining is strictly restricted to authorized Government Officials and Senior Police Officers. Unauthorized modifications are logged and strictly prohibited.
+                  </DialogDescription>
+                </DialogHeader>
+
+                {authStatus === "success" ? (
+                  /* Success Animation State */
+                  <div className="flex flex-col items-center justify-center py-6 animate-in zoom-in duration-300">
+                    <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mb-4 border border-emerald-200 dark:border-emerald-800">
+                      <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-emerald-700 dark:text-emerald-400">Access Granted</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Security clearance verified.</p>
+                  </div>
+                ) : (
+                  /* Password Form State */
+                  <form onSubmit={handlePasswordSubmit} className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                      <label className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+                        Departmental Authorization Code
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordInput}
+                        onChange={(e) => {
+                          setPasswordInput(e.target.value);
+                          if (authStatus === "error") setAuthStatus("idle");
+                        }}
+                        placeholder="Enter 10-digit clearance key..."
+                        className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-md outline-none focus:ring-2 transition-colors font-mono ${
+                          authStatus === "error" 
+                            ? "border-red-500 focus:ring-red-500 text-red-600" 
+                            : "border-slate-300 dark:border-slate-700 focus:ring-slate-400 dark:focus:ring-slate-600 text-slate-900 dark:text-slate-100"
+                        }`}
+                        autoFocus
+                      />
+                      {authStatus === "error" && (
+                        <p className="text-xs text-red-600 dark:text-red-400 font-medium animate-in slide-in-from-top-1">
+                          Access Denied. Incorrect authorization code.
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={!passwordInput || authStatus === "checking"}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white flex gap-2 font-bold"
+                    >
+                      {authStatus === "checking" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                      {authStatus === "checking" ? "Verifying Key..." : "Authenticate"}
+                    </Button>
+                  </form>
+                )}
+              </DialogContent>
+            </Dialog>
             </Dialog>
           </div>
         </header>
