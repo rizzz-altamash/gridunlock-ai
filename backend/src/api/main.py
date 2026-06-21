@@ -236,6 +236,35 @@ def get_current_global_hotspots():
             
     return {"current_hour": current_hour, "day": current_day, "hotspots": global_predictions}
 
+@app.get("/api/v1/hotspots/simulate")
+def simulate_hotspots(hour: int, day: str = "Monday"):
+    """
+    Runs live XGBoost inference for a specific hour to power the UI Time Slider.
+    """
+    global_predictions = []
+    
+    # Take the top 100 historical base zones to simulate
+    top_zones = sorted(
+        predictor.hotspots,
+        key=lambda x:x["impact_score"],
+        reverse=True
+    )[:100]
+    
+    for zone in top_zones:
+        try:
+            pred = predictor.predict(
+                lat=zone["center_lat"],
+                lon=zone["center_lon"],
+                hour=hour,
+                day_of_week=day,
+                junction=zone.get("primary_junction", "No Junction") 
+            )
+            global_predictions.append(pred)
+        except Exception:
+            continue
+            
+    return {"hour": hour, "day": day, "hotspots": global_predictions}
+
 @app.get("/api/v1/hotspots/all")
 def get_all_hotspots():
     """

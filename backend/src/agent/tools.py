@@ -139,7 +139,7 @@ def get_weather_conditions(latitude: float, longitude: float):
         return "Weather telemetry offline. Let's proceed with the analysis."
 
 @tool
-def get_top_hotspots(day_of_week: str, hour: int, limit: int = 10):
+def get_top_hotspots(day_of_week: str, hour: int, limit: int = 5):
     """
     Scans the city to find the highest-risk parking hotspots for a specific day and hour.
     Use this when the Commander asks for "top", "worst", or "most concerning" areas globally.

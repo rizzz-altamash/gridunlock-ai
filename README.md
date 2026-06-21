@@ -140,6 +140,172 @@ The frontend command center provides:
 
 ---
 
+# 🖥️ Tactical Command Interface (Frontend)
+
+The GridUnlock AI frontend is not a conventional web dashboard—it is a **Real-Time Tactical Command Interface** engineered for city commanders and traffic enforcement teams.
+
+Built using **Next.js** and **Tailwind CSS**, the interface seamlessly combines geospatial intelligence, temporal machine learning visualization, and an autonomous AI officer into a unified, low-latency operational viewport.
+
+---
+
+## 🗺️ Geospatial Visualization Engine
+
+Rendering hundreds of thousands of traffic records directly on a browser map would create severe performance bottlenecks. GridUnlock solves this by visualizing **Uber H3 Spatial Hashes** rather than raw coordinate points.
+
+### 🔹 SSR Hydration Strategy
+
+To eliminate the common `window is not defined` issues associated with React geospatial libraries, the Leaflet map is isolated to client-side execution using a carefully configured Next.js dynamic import strategy.
+
+### 🔹 Algorithmic Geometry
+
+The frontend dynamically decodes backend-provided `hex_id` values using **h3-js**, instantly generating precise polygon boundaries and rendering them on top of a CartoDB tile layer.
+
+### 🔹 Data-Rich Tooltips
+
+Each H3 polygon contains interactive tooltips that expose key machine learning insights on hover, including:
+
+- Congestion Impact Score
+- Severity Estimation
+- Relative Violation Volume (%)
+- Peak Choke Time
+- Dominant Violation Type
+
+---
+
+## ⏱️ 4D Temporal ML Scrubbing
+
+One of GridUnlock's most powerful capabilities is the visualization of the fourth dimension: **Time**.
+
+### 🔹 Predictive Radar
+
+A premium frosted-glass control panel allows commanders to switch between:
+
+- **Global Heatmap** (Historical Data)
+- **Predictive Radar** (Current/Future Forecasts)
+
+### 🔹 Cinematic Auto-Play
+
+A time slider enables users to scrub through the full 24-hour day:
+
+```text
+00:00 → 23:00
+```
+
+An integrated Auto-Play mode advances time automatically, allowing commanders to watch congestion zones evolve dynamically as rush-hour patterns emerge across the city.
+
+### 🔹 Debounced Orchestration
+
+To prevent excessive backend requests during timeline scrubbing, a strict **400ms debounce mechanism** ensures simulation APIs are only queried after user interaction stabilizes.
+
+This dramatically reduces unnecessary XGBoost inference calls while maintaining a smooth user experience.
+
+---
+
+## 🤖 Autonomous Intelligence Terminal
+
+Traditional filter-heavy dashboards have been replaced by a conversational command center powered by **LangGraph Agent**.
+
+### 🔹 Tactical Quick Actions
+
+A horizontally scrollable command palette provides rapid-access prompts such as:
+
+```text
+Initiate radar sweep for worst hotspots
+```
+
+```text
+Analyze parking impact at Elite Junction
+```
+
+```text
+Generate deployment recommendations
+```
+
+Selecting a quick action automatically populates the command field and focuses the cursor for rapid operational workflows.
+
+---
+
+## 📡 Data-Driven Live Telemetry Ticker
+
+To ensure the dashboard remains operationally active even during idle periods, GridUnlock AI includes a continuously updating telemetry feed.
+
+### 🔹 Observer Pattern Architecture
+
+The ticker acts as an observer over the live XGBoost prediction payloads currently rendered on the map.
+
+It continuously samples active congestion zones and generates real-time situational updates.
+
+### 🔹 Dynamic Threat Assignment
+
+Telemetry messages are automatically categorized based on the Machine Learning impact score.
+
+Examples include:
+
+```text
+[ALERT] Target Lock: Safina Plaza (Severity: 84.2)
+```
+
+```text
+[WARNING] Spillover Parking Escalation Detected
+```
+
+```text
+[INFO] Routine Clearance Patrol Recommended
+```
+
+### 🔹 Organic Animation Flow
+
+Using Tailwind CSS animation utilities, new telemetry events smoothly slide into view while older entries are pushed upward, creating an authentic dispatch-style operational feed.
+
+---
+
+## ⚙️ Integrated MLOps (Continuous Training Interface)
+
+GridUnlock AI is not a static prototype.
+
+The platform includes a fully integrated **Continuous Training (CT) Interface**, allowing administrators to update the Machine Learning engine directly from the dashboard.
+
+### 🔹 Drag-and-Drop Retraining Pipeline
+
+Users can securely upload new anonymized traffic datasets through a drag-and-drop upload zone.
+
+Dataset submission automatically triggers:
+
+1. Validation
+2. Background Retraining
+3. ML Model Rebuilding
+4. Hot Weight Swapping
+5. Dashboard Refresh
+
+without interrupting active operations.
+
+### 🔹 Live Architecture Status
+
+The CT dashboard exposes real-time machine learning metadata including:
+
+- Active Model Status
+- Last Training Timestamp
+- Total Records Processed
+- Active H3 Hash Count
+- Current Deployment Version
+
+This transparency transforms the machine learning pipeline from a black box into an observable operational system.
+
+---
+
+## 🌟 Frontend Highlights
+
+- Real-Time Tactical Command Interface
+- Dynamic H3 Hex Rendering
+- Temporal Congestion Forecast Visualization
+- Live Telemetry Ticker
+- LangGraph-Powered AI Officer
+- Streaming Intelligence Reports
+- Continuous Training Dashboard
+- Premium Frosted-Glass UI Design
+- Debounced ML Simulation Engine
+- High-Performance Client-Side Rendering
+
 # 🛠️ Technology Stack
 
 | Domain | Technologies Used |
@@ -202,6 +368,7 @@ API_URL=http://127.0.0.1:8000
 
 GEMINI_API_KEY_1=your_gemini_key_1
 GEMINI_API_KEY_2=your_gemini_key_2
+GEMINI_API_KEY_3=your_gemini_key_3
 
 OPENWEATHERMAP_API_KEY=your_owm_key
 ```
