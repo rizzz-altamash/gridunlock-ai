@@ -50,11 +50,10 @@ export default function Dashboard() {
     setTelemetryLogs(prev => [...prev.slice(-3), newLog]); // Keep max 4 visible
   }, []);
 
-  // 0. Theme Initialization (reads stored preference, falls back to OS setting)
+  // 0. Theme Initialization (reads stored preference, falls back to light theme)
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldUseDark = stored ? stored === "dark" : prefersDark;
+    const shouldUseDark = stored === "dark";
     setDarkMode(shouldUseDark);
     document.documentElement.classList.toggle("dark", shouldUseDark);
   }, []);
