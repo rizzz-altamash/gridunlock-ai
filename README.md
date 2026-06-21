@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <a href="https://gridunlock-ai.vercel.app/">
+  <a href="https://gridunlock-ai.vercel.app/" target="_blank">
     <img src="https://img.shields.io/badge/🌐_L I V E - VISIT_WEBSITE-success?style=plastic" />
   </a>
 </p>
@@ -14,9 +14,9 @@
 
 [![XGBoost](https://img.shields.io/badge/XGBoost-17A2B8?style=plastic)](https://xgboost.readthedocs.io/)
 [![Optuna](https://img.shields.io/badge/Optuna-0066CC?style=plastic)](https://optuna.org/)
+[![Uber H3](https://img.shields.io/badge/Uber_H3-000000?style=plastic&logo=uber&logoColor=white)](https://h3geo.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-02569B?style=plastic&logo=python&logoColor=white)](https://python.langchain.com/docs/langgraph)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?style=plastic&logo=google&logoColor=white)](https://ai.google.dev/)
-[![Uber H3](https://img.shields.io/badge/Uber_H3-000000?style=plastic&logo=uber&logoColor=white)](https://h3geo.org/)
 [![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=plastic&logo=leaflet&logoColor=white)](https://leafletjs.com/)
 [![Railway](https://img.shields.io/badge/Railway-0B0D0E?style=plastic&logo=railway&logoColor=white)](https://railway.app/)
 [![OpenWeatherMap](https://img.shields.io/badge/OpenWeatherMap-EB6E4B?style=plastic&logo=icloud&logoColor=white)](https://openweathermap.org/)
@@ -27,7 +27,7 @@
 
 ---
 
-## 🛑 The Core Problem
+## 🛑 The GridLock Problem
 
 ### 1. Reactive Enforcement
 Traffic police rely on blind patrols and only respond *after* carriageways are choked.
@@ -40,7 +40,7 @@ Difficult to prioritize limited enforcement units across a massive urban grid.
 
 ---
 
-## 🟢 The GridUnlock Solution
+## 🟢 My GridUnlock Solution
 
 GridUnlock AI ingests raw municipal traffic data, indexes it using **O(1) geospatial hashing**, and passes it through a GPU-tuned XGBoost predictive engine. The result is a dynamic **Congestion Impact Score (0-100)** visualized on a live tactical dashboard, guided by an autonomous Multi-Agent AI Commander.
 
