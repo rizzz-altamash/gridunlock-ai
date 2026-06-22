@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { UploadCloud, Map as MapIcon, Database, Loader2, DatabaseZap, CalendarClock, HardDrive, Hexagon, Play, Pause, Clock, Layers, Globe, Activity, Sun, Moon, CheckCircle, Lock, ShieldAlert } from "lucide-react";
+import { UploadCloud, Map as MapIcon, Database, Loader2, DatabaseZap, CalendarClock, HardDrive, Hexagon, Play, Pause, Clock, Layers, Globe, Activity, Sun, Moon, CheckCircle, Lock, ShieldAlert, BarChart3, MessagesSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import AgentChat from "@/components/AgentChat";
+import AnalyticsPanel from "@/components/AnalyticsPanel";
 import axios from "axios";
 
 // Dynamically import LeafletMap to bypass Next.js SSR window errors
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentDay, setCurrentDay] = useState("");
   const [telemetryLogs, setTelemetryLogs] = useState([]);
+  const [rightPaneView, setRightPaneView] = useState("analytics"); // "analytics" | "chat"
   const [darkMode, setDarkMode] = useState(false);
 
   // Security Authentication States
@@ -127,7 +129,7 @@ export default function Dashboard() {
     if (isPlaying && viewMode === "simulate") {
       interval = setInterval(() => {
         setSelectedHour((prev) => (prev === 23 ? 0 : prev + 1));
-      }, 3000); // Wait 3 seconds per hour 
+      }, 3500); // Waits 3.5 seconds per hour 
     }
     return () => clearInterval(interval);
   }, [isPlaying, viewMode]);
@@ -338,7 +340,7 @@ export default function Dashboard() {
       <div className="flex-3 lg:flex-1 flex flex-col min-w-0 min-h-0">
         
         {/* Top Navbar */}
-        <header className="h-16 px-3 sm:px-6 bg-blue-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm z-10 gap-2 transition-colors duration-300">
+        <header className="h-16 px-3 sm:px-6 bg-blue-200 dark:bg-slate-900 border-b-2 border-blue-500 dark:border-slate-800 flex items-center justify-between shadow-sm z-10 gap-2 transition-colors duration-300">
           <div className="flex items-center gap-2 min-w-0">
             <MapIcon className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-none" />
             <h1 className="text-base sm:text-xl font-bold tracking-tight truncate">
@@ -608,29 +610,37 @@ export default function Dashboard() {
                    </div>
                  </div>
 
-                 {/* Bottom Row: Time Scrubber (ONLY RENDERS IF IN SIMULATE MODE) */}
-                 {viewMode === "simulate" && (
-                   <div className="flex items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-1 duration-700 ease-out">
-                     <button 
-                       onClick={() => setIsPlaying(!isPlaying)}
-                       className="p-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 flex-none"
-                     >
-                       {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
-                     </button>
+                  {/* Bottom Row: Time Scrubber (ONLY RENDERS IF IN SIMULATE MODE) */}
+                  {viewMode === "simulate" && (
+                    <div className="flex items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-1 duration-700 ease-out">
+                      <button 
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        className="relative flex items-center justify-center p-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 flex-none overflow-hidden"
+                      >
+                        {isPlaying && (
+                          <div className="absolute inset-0 rounded-full border-2 border-white/20 border-t-white border-r-white animate-spin animation-duration-[3.5s]" />
+                        )}
+                        
+                        {isPlaying ? (
+                          <Pause className="w-4 h-4 relative z-10" />
+                        ) : (
+                          <Play className="w-4 h-4 ml-0.5 relative z-10" />
+                        )}
+                      </button>
 
-                     <input 
-                       type="range" 
-                       min="0" 
-                       max="23" 
-                       value={selectedHour} 
-                       onChange={(e) => {
-                         setIsPlaying(false);
-                         setSelectedHour(parseInt(e.target.value));
-                       }}
-                       className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                     />
-                   </div>
-                 )}
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="23" 
+                        value={selectedHour} 
+                        onChange={(e) => {
+                          setIsPlaying(false);
+                          setSelectedHour(parseInt(e.target.value));
+                        }}
+                        className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                    </div>
+                  )}
                </div>
 
                {/* DATA-DRIVEN TELEMETRY TICKER */}
@@ -672,8 +682,58 @@ export default function Dashboard() {
       </div>
 
       {/* RIGHT PANE */}
-      <aside className="w-full lg:w-110 flex-2 lg:flex-none min-h-0 shadow-xl z-20">
-        <AgentChat />
+      <aside className="w-full lg:w-110 flex-2 lg:flex-none min-h-0 flex flex-col shadow-xl z-20 bg-slate-50 dark:bg-slate-950 border-l-2 border-blue-500 dark:border-slate-800">
+        
+        {/* Segmented Control Header */}
+        <div className="flex items-center h-16 p-3 sm:p-6 border-b-2 border-blue-500 dark:border-slate-800 gap-2 bg-blue-200 dark:bg-slate-900/50">
+          <button
+            onClick={() => setRightPaneView("analytics")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 ${
+              rightPaneView === "analytics"
+                ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            Intelligence Analytics
+          </button>
+          
+          <button
+            onClick={() => setRightPaneView("chat")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 ${
+              rightPaneView === "chat"
+                ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+            }`}
+          >
+            <MessagesSquare className="w-4 h-4" />
+            Tactical AI Agent
+          </button>
+        </div>
+
+        {/* Dynamic Content Area */}
+        <div className="flex-1 overflow-hidden flex flex-col p-4 relative">
+          {/* Analytics Panel Container */}
+          {/* Using 'hidden' when not active keeps it mounted but invisible */}
+          <div 
+            className={`flex-1 overflow-hidden transition-opacity duration-300 ${
+              rightPaneView === "analytics" ? "block animate-in fade-in zoom-in-90" : "hidden"
+            }`}
+          >
+            <AnalyticsPanel currentDay={currentDay || "Monday"} />
+          </div>
+
+          {/* Chat Agent Container */}
+          {/* Stays mounted in the bg, preserving all chat history */}
+          <div 
+            className={`flex-1 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 transition-opacity duration-300 flex flex-col ${
+              rightPaneView === "chat" ? "flex animate-in fade-in zoom-in-90" : "hidden"
+            }`}
+          >
+            <AgentChat />
+          </div>
+        </div>
+        
       </aside>
 
     </div>

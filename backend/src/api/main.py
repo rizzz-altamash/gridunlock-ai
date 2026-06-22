@@ -293,3 +293,119 @@ async def get_model_status():
         return {"status": "Offline", "last_trained_date": fallback_date, "total_records_processed": 0, "active_monitored_zones": 0}
     except Exception as e:
         return {"status": "Error", "detail": str(e)}
+
+
+# Dashboard Analytics  
+ANALYTICS_CACHE = {}
+
+@app.get("/api/v1/analytics/dashboard")
+def get_dashboard_analytics(day: str = "Monday"):
+    """
+    Generates aggregated data for the frontend charting components.
+    Includes Smart Caching for instant load times.
+    """
+    global ANALYTICS_CACHE
+    
+    # Create a unique cache key based on the day AND the current model version
+    model_version = predictor.meta.get("last_trained_date", "v1")
+    cache_key = f"{day}_{model_version}"
+    
+    # RETURN CACHED DATA IF AVAILABLE (0.01 second load time)
+    if cache_key in ANALYTICS_CACHE:
+        print(f"⚡ [Analytics] Cache present for {day}. Returning cache...")
+        return ANALYTICS_CACHE[cache_key]
+
+    print(f"⚡ [Analytics] Cache miss for {day}. Running Vectorized inference pipeline...")
+
+    # Vectorized method (Instantly gets all 24 hours)
+    trend_data = predictor.predict_24h_trend(day)
+
+    # Get Top 5 Critical Hotspots for the *current* hour
+    current_hour = datetime.now().hour
+    current_predictions = predictor.predict_batch(predictor.hotspots, current_hour, day)
+
+    # Filter out 'No Junction' before sorting
+    valid_predictions = [
+        p for p in current_predictions 
+        if "No Junction" not in str(predictor.hotspot_lookup.get(p["hex_id"], {}).get("primary_junction", ""))
+    ]
+    
+    sorted_spots = sorted(valid_predictions, key=lambda x: x["impact_score"], reverse=True)
+
+    # Deduplication 
+    top_hotspots = []
+    seen_names = set()
+    
+    for spot in sorted_spots[:5]:
+        raw_name = predictor.hotspot_lookup.get(spot["hex_id"], {}).get("primary_junction", "Unknown")
+        clean_name = raw_name.split(" - ")[1].strip() if " - " in raw_name else raw_name
+        clean_name = clean_name.replace("Junction", "").strip()
+        
+        # Skip if it's a generic hex, unknown, or we already added this junction
+        if "No" in clean_name or "Unknown" in clean_name or clean_name in seen_names:
+            continue
+            
+        top_hotspots.append({
+            "location": clean_name[:12] + "..." if len(clean_name) > 12 else clean_name,
+            "impact": spot["impact_score"]
+        })
+        seen_names.add(clean_name)
+        
+        if len(top_hotspots) >= 5: # Stop once we have 5 unique junctions
+            break
+
+    # --- For CHART: Risk Quadrant (Scatter Plot) ---
+    risk_quadrant = []
+    # Take the top 40 hotspots to populate the scatter plot
+    for spot in sorted_spots[:40]:
+        hex_data = predictor.hotspot_lookup.get(spot["hex_id"], {})
+        raw_name = hex_data.get("primary_junction", "Zone")
+        clean_name = raw_name.split(" - ")[1].strip() if " - " in raw_name else raw_name
+        
+        # Scale repeat_factor (0 to 1) up to 100 for better chart visibility
+        repeat_percentage = hex_data.get("repeat_factor", 0) * 100
+        
+        risk_quadrant.append({
+            "name": clean_name,
+            "impact": spot["impact_score"],
+            "chronicity": round(repeat_percentage, 1),
+            "volume": hex_data.get("total_volume", 10) # Used for bubble size
+        })
+
+    # Violation Diversity (Mocked/Aggregated)
+    violation_distribution = [
+        {"name": "Double Parking", "value": 45},
+        {"name": "Bus Stop Blockage", "value": 25},
+        {"name": "Intersection Spillover", "value": 20},
+        {"name": "No Parking Zone", "value": 10},
+    ]
+    
+    # Weekly Congestion Signature (Operational Rostering for Radar Chart)
+    # Calculate a dynamic baseline from the current predictions to keep it ultra fast
+    if valid_predictions:
+        worst_zones = sorted(valid_predictions, key=lambda x: x["impact_score"], reverse=True)[:50]
+        base_risk = sum(p["impact_score"] for p in worst_zones) / len(worst_zones)
+    else:
+        base_risk = 40.0
+
+    # Apply realistic urban traffic multipliers (Fridays/Saturdays are peak)
+    weekly_signature = [
+        {"day": "Mon", "risk": round(base_risk * 0.85, 1)},
+        {"day": "Tue", "risk": round(base_risk * 0.90, 1)},
+        {"day": "Wed", "risk": round(base_risk * 0.95, 1)},
+        {"day": "Thu", "risk": round(base_risk * 1.05, 1)},
+        {"day": "Fri", "risk": round(base_risk * 1.45, 1)},
+        {"day": "Sat", "risk": round(base_risk * 1.60, 1)},
+        {"day": "Sun", "risk": round(base_risk * 1.15, 1)},
+    ]
+
+    final_payload = {
+        "trend_data": trend_data,
+        "top_hotspots": top_hotspots,
+        "risk_quadrant": risk_quadrant,
+        "weekly_signature": weekly_signature,
+        "violation_distribution": violation_distribution,
+    }
+    
+    ANALYTICS_CACHE[cache_key] = final_payload
+    return final_payload

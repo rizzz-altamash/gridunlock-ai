@@ -245,7 +245,7 @@ export default function AgentChat() {
     try {
       const response = await axios.post(`${API_BASE}/api/v1/chat`, {
         message: userMsg,
-        session_id: "commander_1" // sessionId
+        session_id: "commander_3" // sessionId
       });
       
       // Push the new message with the animate flag set to true
@@ -264,7 +264,7 @@ export default function AgentChat() {
       <div className="p-3 sm:p-4 border-b border-blue-500 dark:border-slate-700 bg-blue-200 dark:bg-slate-800 flex-none flex items-center justify-between shadow-sm transition-colors duration-300">
         <div className="flex items-center gap-2">
           <Bot className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          <h2 className="font-semibold text-slate-800 dark:text-slate-100">AI Intelligence Terminal</h2>
+          <h2 className="font-semibold text-slate-800 dark:text-slate-100 tracking-wide">AI Officer</h2>
         </div>
         
         <Button 
@@ -283,7 +283,15 @@ export default function AgentChat() {
       <div 
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4"
+        className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4
+        [&::-webkit-scrollbar]:w-1.5 
+        [&::-webkit-scrollbar-track]:rounded-full 
+        [&::-webkit-scrollbar-track]:bg-slate-300/50 
+        dark:[&::-webkit-scrollbar-track]:bg-slate-700/50
+        [&::-webkit-scrollbar-thumb]:bg-blue-400 
+        dark:[&::-webkit-scrollbar-thumb]:bg-blue-600
+        hover:[&::-webkit-scrollbar-thumb]:bg-blue-500 
+        transition-colors"
       >
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
