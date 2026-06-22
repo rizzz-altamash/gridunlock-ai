@@ -1,5 +1,4 @@
-# backend/src/model/train.py
-
+# backend/src/model/train.py 
 import argparse
 import os
 from datetime import datetime
@@ -116,16 +115,15 @@ def run_pipeline(data_path):
         hex_stats["unique_days"]
     )
 
-    volume_threshold = np.percentile(
-        hex_stats.total_volume,
-        90
-    )
+    # --- THE FIX: Retaining full spatial spectrum ---
+    MINIMUM_VIOLATIONS = 3
 
     hotspots_base = hex_stats[
         hex_stats.total_volume
         >=
-        volume_threshold
+        MINIMUM_VIOLATIONS
     ].copy()
+    
     hotspot_records = df[
         df.hex_id.isin(
             hotspots_base.hex_id
@@ -164,6 +162,26 @@ def run_pipeline(data_path):
         temporal,
         on="hex_id"
     )
+
+    # Clean up merge overlaps immediately 
+    final_hotspots.drop(
+        columns=["dominant_violation_x"],
+        inplace=True,
+        errors="ignore"
+    )
+
+    final_hotspots.rename(
+        columns={
+            "dominant_violation_y": "dominant_violation"
+        },
+        inplace=True
+    )
+
+    # Fill any empty junctions for inference payload
+    final_hotspots["primary_junction"] = (
+        final_hotspots["primary_junction"].fillna("No Junction")
+    )
+
     scaler = MinMaxScaler()
     cols = [
         "total_volume",
@@ -437,22 +455,6 @@ def run_pipeline(data_path):
         )
     )
 
-    final_hotspots.drop(
-        columns=["dominant_violation_x"],
-        inplace=True,
-        errors="ignore"
-    )
-
-    final_hotspots.rename(
-        columns={
-            "dominant_violation_y": "dominant_violation"
-        },
-        inplace=True
-    )
-
-    final_hotspots["primary_junction"] = (
-        final_hotspots["primary_junction"].fillna("No Junction")
-    )
     final_hotspots.to_json(
         os.path.join(
             artifacts,

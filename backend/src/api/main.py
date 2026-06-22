@@ -205,65 +205,57 @@ async def trigger_training(background_tasks: BackgroundTasks, file: UploadFile =
 # GLOBAL HOTSPOTS INIT ENDPOINT (For the Next.js Map)
 @app.get("/api/v1/hotspots/current")
 def get_current_global_hotspots():
-    """Runs live XGBoost inference on the top 100 historical hotspots for the current hour."""
+    """Runs live XGBoost batch inference on ALL active zones instantly."""
     now = datetime.now()
     current_hour = now.hour
     current_day = now.strftime("%A")
     
-    global_predictions = []
-    
-    # Take the top 100 hotspots from the loaded JSON to prevent API timeouts
-    # (Running inference on all hexagons synchronously might be too slow)
-    top_zones = sorted(
-        predictor.hotspots,
-        key=lambda x:x["impact_score"],
-        reverse=True
-    )[:100]
-    
-    for zone in top_zones:
-        try:
-            # We use the exact center coordinates of the H3 hexagon
-            pred = predictor.predict(
-                lat=zone["center_lat"],
-                lon=zone["center_lon"],
-                hour=current_hour,
-                day_of_week=current_day,
-                junction=zone.get("primary_junction", "No Junction") 
-            )
-            global_predictions.append(pred)
-        except Exception:
-            continue
+    # 1. Predict EVERYTHING in a single batch call (Takes < 0.2 seconds)
+    global_predictions = predictor.predict_batch(
+        zones=predictor.hotspots,
+        hour=current_hour,
+        day_of_week=current_day
+    )
             
-    return {"current_hour": current_hour, "day": current_day, "hotspots": global_predictions}
+    # 2. Sort dynamically by the newly predicted impact score
+    sorted_predictions = sorted(
+        global_predictions,
+        key=lambda x: x["impact_score"],
+        reverse=True
+    )
+    
+    # 3. Slice and return top 300 
+    return {
+        "current_hour": current_hour, 
+        "day": current_day, 
+        "hotspots": sorted_predictions[:100] 
+    }
 
 @app.get("/api/v1/hotspots/simulate")
 def simulate_hotspots(hour: int, day: str = "Monday"):
     """
-    Runs live XGBoost inference for a specific hour to power the UI Time Slider.
+    Runs live XGBoost batch inference for a specific hour instantly.
     """
-    global_predictions = []
-    
-    # Take the top 100 historical base zones to simulate
-    top_zones = sorted(
-        predictor.hotspots,
-        key=lambda x:x["impact_score"],
-        reverse=True
-    )[:100]
-    
-    for zone in top_zones:
-        try:
-            pred = predictor.predict(
-                lat=zone["center_lat"],
-                lon=zone["center_lon"],
-                hour=hour,
-                day_of_week=day,
-                junction=zone.get("primary_junction", "No Junction") 
-            )
-            global_predictions.append(pred)
-        except Exception:
-            continue
+    # 1. Predict EVERYTHING in a single batch call (Takes < 0.2 seconds)
+    global_predictions = predictor.predict_batch(
+        zones=predictor.hotspots,
+        hour=hour,
+        day_of_week=day
+    )
             
-    return {"hour": hour, "day": day, "hotspots": global_predictions}
+    # 2. Sort dynamically by the newly predicted impact score
+    sorted_predictions = sorted(
+        global_predictions,
+        key=lambda x: x["impact_score"],
+        reverse=True
+    )
+    
+    # 3. Return top 300 
+    return {
+        "hour": hour, 
+        "day": day, 
+        "hotspots": sorted_predictions[:300]
+    }
 
 @app.get("/api/v1/hotspots/all")
 def get_all_hotspots():
@@ -286,7 +278,7 @@ async def get_model_status():
         meta_path = os.path.join(src_dir, "model", "artifacts", "meta.pkl")
 
         # fallback_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
-        fallback_date = "June 19, 2026 at 10:53 AM"  # First trained date of the initial model (hardcoded for consistency) 
+        fallback_date = "June 21, 2026 at 10:53 AM"  # First trained date of the initial model (hardcoded for consistency) 
         
         if os.path.exists(meta_path):
             import joblib

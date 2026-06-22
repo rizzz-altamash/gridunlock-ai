@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, Tooltip, ZoomControl } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Tooltip, ZoomControl, Popup } from "react-leaflet";
 import { cellToBoundary } from "h3-js";
 import "leaflet/dist/leaflet.css";
 
@@ -95,7 +95,7 @@ export default function LeafletMap({ hotspots }) {
                 weight: 2,
               }}
             >
-              <Tooltip sticky>
+              <Tooltip opacity={0.9}>
                 <div className="min-w-50 sm:min-w-60 max-w-[80vw] sm:max-w-none p-2.5 sm:p-3 text-xs sm:text-sm font-sans bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg shadow-md transition-colors duration-300">
 
                   <p className="font-bold text-blue-600 dark:text-blue-400 mb-2">
