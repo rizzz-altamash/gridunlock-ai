@@ -3,7 +3,7 @@
 import os
 import sys
 
-# MUST BE AT THE VERY TOP: Suppress OpenBLAS memory allocation crashes
+# MUST BE AT THE VERY TOP: Suppress OpenBLAS memory allocation crashes 
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 

@@ -18,13 +18,11 @@ import AgentChat from "@/components/AgentChat";
 import AnalyticsPanel from "@/components/AnalyticsPanel";
 import axios from "axios";
 
-// Dynamically import LeafletMap to bypass Next.js SSR window errors
-const DynamicMap = dynamic(() => import("@/components/LeafletMap"), { 
+// Dynamically importing MapplsMap to bypass Next.js SSR window errors 
+const DynamicMappls = dynamic(() => import("@/components/MapplsMap"), { 
   ssr: false,
   loading: () => (
-    <div className="h-full w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 gap-2 px-4 text-center transition-colors duration-300">
-      <Loader2 className="w-5 h-5 animate-spin" /> Initializing Map Engine...
-    </div>
+    <div className="h-full w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 gap-2 px-4 text-center transition-colors duration-300" />
   )
 });
 
@@ -95,7 +93,7 @@ export default function Dashboard() {
     fetchDashboardData();
   }, [addTelemetryLog]);
 
-  // 2. The Unified Map Fetching Engine (Handles both 'simulate' and 'all')
+  // 2. The Unified Map Fetching Engine 
   useEffect(() => {
     const fetchMapData = async () => {
       if (!currentDay) return;
@@ -129,7 +127,7 @@ export default function Dashboard() {
     if (isPlaying && viewMode === "simulate") {
       interval = setInterval(() => {
         setSelectedHour((prev) => (prev === 23 ? 0 : prev + 1));
-      }, 3500); // Waits 3.5 seconds per hour 
+      }, 5000); // Waits 5 seconds per hour 
     }
     return () => clearInterval(interval);
   }, [isPlaying, viewMode]);
@@ -579,7 +577,9 @@ export default function Dashboard() {
         <main className="flex-1 min-h-0 p-2 sm:p-4 bg-slate-100/50 dark:bg-slate-950/50 transition-colors duration-300">
           <div className="h-full rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 relative isolate z-0 transition-colors duration-300">
             <div className="h-full w-full relative z-0">
-               <DynamicMap hotspots={hotspots} />
+
+               <DynamicMappls hotspots={hotspots} />
+               
                {/* HUD WIDGET */}
                <div className="absolute top-3 sm:top-6 left-1/2 transform -translate-x-1/2 z-400 w-[calc(100%-1.5rem)] sm:w-[90%] max-w-162.5 bg-white/40 dark:bg-slate-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white dark:border-slate-700 flex flex-col gap-3 sm:gap-4 transition-all">
                  {/* Top Row: Mode Toggles & Status */}
@@ -644,7 +644,7 @@ export default function Dashboard() {
                </div>
 
                {/* DATA-DRIVEN TELEMETRY TICKER */}
-               <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-400 w-[58%] sm:w-107 max-w-107 bg-white/40 dark:bg-slate-900/50 backdrop-blur-sm p-2 sm:p-3.5 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white dark:border-slate-700 flex flex-col gap-1.5 sm:gap-2 overflow-hidden h-28 sm:h-36 transition-colors duration-300">
+               <div className="absolute bottom-3 left-3 sm:bottom-7.5 sm:left-1 z-400 w-[58%] sm:w-107 max-w-107 bg-white/40 dark:bg-slate-900/50 backdrop-blur-sm p-2 sm:p-3.5 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white dark:border-slate-700 flex flex-col gap-1.5 sm:gap-2 overflow-hidden h-28 sm:h-36 transition-colors duration-300">
                  <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-2">
                    <div className="relative flex h-2.5 w-2.5">
                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -668,10 +668,10 @@ export default function Dashboard() {
             </div>
              
              {/* Map Legend Overlay */}
-             <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 z-400 bg-white/40 dark:bg-slate-900/50 backdrop-blur-sm p-2.5 sm:p-4 rounded-lg shadow-md border border-slate-200 dark:border-slate-700 max-w-37.5 sm:max-w-none transition-colors duration-300">
+             <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-2 z-400 bg-white/40 dark:bg-slate-900/50 backdrop-blur-sm p-2.5 sm:p-4 rounded-lg shadow-md border border-slate-200 dark:border-slate-700 max-w-37.5 sm:max-w-none transition-colors duration-300">
                <h4 className="text-[10px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">Impact Severity</h4>
                <div className="space-y-1 sm:space-y-2 text-[11px] sm:text-sm text-slate-700 dark:text-slate-300 font-medium">
-                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 shadow-sm flex-none"></div> Critical (70+)</div>
+                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 dark:bg-pink-300 shadow-sm flex-none"></div> Critical (70+)</div>
                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-purple-500 shadow-sm flex-none"></div> High (30-74)</div>
                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-orange-500 shadow-sm flex-none"></div> Moderate (5-29)</div>
                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 shadow-sm flex-none"></div> Low (0-4)</div>
@@ -682,7 +682,7 @@ export default function Dashboard() {
       </div>
 
       {/* RIGHT PANE */}
-      <aside className="w-full lg:w-110 flex-2 lg:flex-none min-h-0 flex flex-col shadow-xl z-20 bg-slate-50 dark:bg-slate-950 border-l-2 border-blue-500 dark:border-slate-800">
+      <aside className="w-full lg:w-110 flex-2 lg:flex-none min-h-0 flex flex-col shadow-xl z-20 bg-slate-100/50 dark:bg-slate-950 border-l-2 border-blue-500 dark:border-slate-800">
         
         {/* Segmented Control Header */}
         <div className="flex items-center h-16 p-3 sm:p-6 border-b-2 border-blue-500 dark:border-slate-800 gap-2 bg-blue-200 dark:bg-slate-900/50">

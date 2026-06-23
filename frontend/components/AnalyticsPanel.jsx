@@ -93,7 +93,7 @@ export default function AnalyticsPanel({ currentDay }) {
     return (
       <div className="flex flex-col gap-4 w-full h-full overflow-y-auto pr-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm animate-pulse shrink-0">
+          <div key={i} className="bg-blue-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm animate-pulse shrink-0">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-4 h-4 bg-slate-200 dark:bg-slate-800 rounded-full" />
               <div className="w-40 h-3 bg-slate-200 dark:bg-slate-800 rounded-full" />
@@ -120,7 +120,7 @@ export default function AnalyticsPanel({ currentDay }) {
     >
 
       {/* Chart 1: Predictive Trend - Line Plot */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
+      <div className="bg-blue-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-blue-500" />
@@ -133,7 +133,7 @@ export default function AnalyticsPanel({ currentDay }) {
             <LineChart data={data.trend_data}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff" : "#334155"} vertical={false} opacity={0.3} />
               <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickMargin={10} />
-              <YAxis stroke="#64748b" fontSize={10} domain={['dataMin', 'dataMax']} hide />
+              <YAxis stroke="#64748b" fontSize={10} domain={['dataMin-0.1', 'dataMax']} hide />
               <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#f8fafc', fontSize: '12px' }}/>
               <Line type="monotone" dataKey="avg_impact" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 6, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }} />
             </LineChart>
@@ -142,7 +142,7 @@ export default function AnalyticsPanel({ currentDay }) {
       </div>
 
       {/* Chart 2: Prioritization Queue - Bar Plot */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
+      <div className="bg-blue-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="w-4 h-4 text-red-500" />
           <h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Targeted Enforcement Queue</h3>
@@ -151,7 +151,7 @@ export default function AnalyticsPanel({ currentDay }) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.top_hotspots} layout="vertical" margin={{ top: 0, left: 30, right: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff" : "#334155"} horizontal={false} opacity={0.3} />
-              <XAxis type="number" domain={[0, 'dataMax+3']} hide />
+              <XAxis type="number" domain={[0, 'dataMax+1']} hide />
               <YAxis dataKey="location" type="category" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
               <RechartsTooltip cursor={{fill: '#334155', opacity: 0.1}} contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#f8fafc', fontSize: '12px' }}/>
               <Bar dataKey="impact" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={16} />
@@ -161,7 +161,7 @@ export default function AnalyticsPanel({ currentDay }) {
       </div>
 
       {/* Chart 3: Risk Quadrant - Scatter Plot */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
+      <div className="bg-blue-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Crosshair className="w-4 h-4 text-orange-500" />
@@ -175,8 +175,8 @@ export default function AnalyticsPanel({ currentDay }) {
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff" : "#334155"} opacity={0.3} />
-              <XAxis type="number" dataKey="chronicity" name="Chronicity" stroke="#64748b" fontSize={10} domain={['dataMin - 2', 'dataMax + 5']} tickFormatter={(val) => `${val.toFixed(0)}%`} />
-              <YAxis type="number" dataKey="impact" name="Severity" stroke="#64748b" fontSize={10} domain={[0, 'dataMax + 5']} tickFormatter={(val) => `${val.toFixed(0)}`} />
+              <XAxis type="number" dataKey="chronicity" name="Chronicity" stroke="#64748b" fontSize={10} domain={['dataMin - 2', 'dataMax + 2']} tickFormatter={(val) => `${val.toFixed(0)}%`} />
+              <YAxis type="number" dataKey="impact" name="Severity" stroke="#64748b" fontSize={10} domain={[0, 'dataMax + 2']} tickFormatter={(val) => `${val.toFixed(0)}`} />
               <ZAxis type="number" dataKey="volume" range={[20, 200]} />
               <RechartsTooltip content={<ScatterTooltip />} cursor={{strokeDasharray: '3 3'}} />
               <Scatter name="Zones" data={data.risk_quadrant} fill="#f97316" fillOpacity={0.7} stroke="#fff" strokeWidth={1} />
@@ -186,7 +186,7 @@ export default function AnalyticsPanel({ currentDay }) {
       </div>
 
       {/* Chart 4: Weekly Risk Signature - Spider Plot */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
+      <div className="bg-blue-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-emerald-500" />
@@ -218,7 +218,7 @@ export default function AnalyticsPanel({ currentDay }) {
       </div>
 
       {/* Chart 5: Violation Diversity - Pie Plot */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
+      <div className="bg-blue-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm shrink-0">
         <div className="flex items-center gap-2 mb-2">
           <PieIcon className="w-4 h-4 text-purple-500" />
           <h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Violation Profiling</h3>
